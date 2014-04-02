@@ -38,6 +38,8 @@ class SitemapGeneratorSpec extends Specification {
     // take other url info (lastmod, changefreq, priority)
     // validate the above, error
     // check when list of urls gets too big (max 50k)
+    // sort urls in output
+    // catch or ignore duplicate urls
   }
 }
 
