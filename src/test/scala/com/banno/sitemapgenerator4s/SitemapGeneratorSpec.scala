@@ -8,7 +8,11 @@ class SitemapGeneratorSpec extends Specification {
   "the sitemap generator" should {
     "generate xml containing an urlset element" in new context {
       generator.xml.label mustEqual "urlset"
+      generator.xml.namespace mustEqual(
+        "http://www.sitemaps.org/schemas/sitemap/0.9")
     }
+
+
   }
 }
 
