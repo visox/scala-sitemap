@@ -7,6 +7,11 @@ import com.github.nscala_time.time.Imports._
 import com.netaporter.uri.Uri
 
 class SitemapGeneratorSpec extends Specification {
+
+  trait context extends Scope {
+    lazy val generator = new SitemapGenerator("http://www.example.com")
+  }
+
   "the sitemap generator" should {
 
     "generate xml containing an urlset element" in new context {
@@ -34,15 +39,32 @@ class SitemapGeneratorSpec extends Specification {
       locElements(0).text mustEqual("http://www.example.com/blog")
     }
 
-    "uses an object for other sitemap entry info" in new allOptionsContext {
+    trait entryObjectContext extends context {
+      val entry = SitemapEntry(Uri.parse("http://www.example.com/blog"))
+    }
+
+    "uses an object for other sitemap entry info" in new entryObjectContext {
       generator.add(entry)
       (generator.xml \\ "loc")(0).text mustEqual "http://www.example.com/blog"
     }
 
-    "including changefreq" in new allOptionsContext {
-      generator.add(entry)
+    "including lastmod" in new entryObjectContext {
+      val justNow = DateTime.now
+      generator.add(entry.copy(lastmod = Some(justNow)))
+      (generator.xml \\ "lastmod") must not be empty
+      new DateTime((generator.xml \\ "lastmod")(0).text) mustEqual justNow
+    }
+
+    "and changefreq" in new entryObjectContext {
+      generator.add(entry.copy(changefreq = Some("monthly")))
       (generator.xml \\ "changefreq") must not be empty
       (generator.xml \\ "changefreq")(0).text mustEqual "monthly"
+    }
+
+    "and priority" in new entryObjectContext {
+      generator.add(entry.copy(priority   = Some(0.8)))
+      (generator.xml \\ "priority") must not be empty
+      (generator.xml \\ "priority")(0).text mustEqual "0.8"
     }
 
     // take other url info (lastmod, changefreq, priority)
@@ -52,18 +74,6 @@ class SitemapGeneratorSpec extends Specification {
     // check when list of urls gets too big (max 50k)
     // sort urls in output
     // catch or ignore duplicate urls
+    // date formatting options
   }
-}
-
-trait context extends Scope {
-  lazy val generator = new SitemapGenerator("http://www.example.com")
-}
-
-trait allOptionsContext extends context {
-  val justNow = DateTime.now
-  val entry = SitemapEntry(
-    loc        = Uri.parse("http://www.example.com/blog"),
-    lastmod    = Some(justNow),
-    changefreq = Some("monthly"),
-    priority   = Some(0.8))
 }
