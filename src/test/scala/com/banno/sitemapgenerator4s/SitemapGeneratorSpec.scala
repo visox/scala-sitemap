@@ -59,8 +59,8 @@ class SitemapGeneratorSpec extends Specification {
         throwA[IllegalArgumentException])
     }
 
-    "will not accept invalid urls" in new context {
-      generator.add("derp?!") must throwA[RuntimeException]
+    "will not accept invalid urls" in  {
+      SitemapEntry("derp?!") must throwA[RuntimeException]
       // ParseError comes from scala-uri when implicitly converting
       // a string to a Uri whilst instantiating a SitemapEntry. I'm
       // not sure how to catch it and convert it to another exception
@@ -97,11 +97,20 @@ class SitemapGeneratorSpec extends Specification {
       (generator.xml \\ "priority")(0).text mustEqual "0.8"
     }
 
-    "will check for invalid priority values" in new context {
-      pending
+    "will check for invalid priority values" in new entryObjectContext {
+      generator.add(entry.copy(priority = Some(5.0))) must(
+        throwA[IllegalArgumentException])
+      generator.add(entry.copy(priority = Some(-0.05))) must(
+        throwA[IllegalArgumentException])
+      generator.add(entry.copy(priority = Some(1))) must not(
+        throwA[IllegalArgumentException])
+      generator.add(entry.copy(priority = Some(0))) must not(
+        throwA[IllegalArgumentException])
     }
 
-    "will accept lastmod as string and convert to DateTime" in new context {
+    "will accept lastmod as string and convert to DateTime" in
+      new entryObjectContext
+    {
       pending
     }
 
