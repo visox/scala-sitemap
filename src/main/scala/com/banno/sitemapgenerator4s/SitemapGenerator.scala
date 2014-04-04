@@ -2,8 +2,8 @@ package com.banno.sitemapgenerator4s
 
 import com.github.nscala_time.time.Imports._
 import com.netaporter.uri.Uri
+import com.netaporter.uri.dsl._
 import scala.xml._
-//import com.netaporter.uri.dsl._
 
 case class SitemapEntry(
   val loc:        Uri,
@@ -11,21 +11,10 @@ case class SitemapEntry(
   val changefreq: Option[String]   = None,
   val priority:   Option[Double]   = None)
 
-object SitemapEntry {
-  def apply(
-    loc:        String,
-    lastmod:    Option[DateTime],
-    changefreq: Option[String],
-    priority:   Option[Double]) =
-  {
-    new SitemapEntry(Uri.parse(loc), lastmod, changefreq, priority)
-  }
+class SitemapGenerator(baseUrl: Uri) {
 
-  def apply(loc: Uri):    SitemapEntry = this(loc, None, None, None)
-  def apply(loc: String): SitemapEntry = this(Uri.parse(loc))
-}
-
-class SitemapGenerator(baseUrl: String) {
+  require(baseUrl.scheme != None, "Base Url requires protocol")
+  require(baseUrl.host   != None, "Base Url requires host")
 
   var entries: Seq[SitemapEntry] = Seq()
   val xmlns = "http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -51,7 +40,40 @@ class SitemapGenerator(baseUrl: String) {
     }
   }
 
-  def add(entry: SitemapEntry) { entries +:= entry }
-  def add(url: String) { entries +:= SitemapEntry(url) }
-  def add(url: Uri)    { entries +:= SitemapEntry(url) }
+  private def fillInMissingDomains(entry: SitemapEntry) = {
+    (entry.loc.scheme, entry.loc.host) match {
+      case (None, None) => {
+        entry.copy(loc = entry.loc.copy(
+          scheme = baseUrl.scheme,
+          host   = baseUrl.host))
+      }
+      case (None, _) => {
+        entry.copy(loc = entry.loc.copy(scheme = baseUrl.scheme))
+      }
+      case (_, None) => {
+        entry.copy(loc = entry.loc.copy(host = baseUrl.host))
+      }
+      case (_, _) => entry
+    }
+  }
+
+  private def checkEntryForErrors(entry: SitemapEntry) = {
+    if (entry.loc.host   != baseUrl.host ||
+        entry.loc.scheme != baseUrl.scheme)
+    {
+      throw new IllegalArgumentException(
+        s"Sitemap entries must all be for same site ($baseUrl)")
+    }
+    entry
+  }
+
+  def validateEntry(entry: SitemapEntry) = {
+    checkEntryForErrors(fillInMissingDomains(entry))
+  }
+
+  def add(entry: SitemapEntry): Unit = {
+    entries +:= validateEntry(entry)
+  }
+
+  def add(url: Uri): Unit = add(SitemapEntry(url))
 }

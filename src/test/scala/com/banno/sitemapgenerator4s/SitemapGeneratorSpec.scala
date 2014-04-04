@@ -5,6 +5,7 @@ import org.specs2.specification.{After, BeforeAfterEach, Scope}
 import scala.xml._
 import com.github.nscala_time.time.Imports._
 import com.netaporter.uri.Uri
+import com.netaporter.uri.dsl._
 
 class SitemapGeneratorSpec extends Specification {
 
@@ -13,6 +14,12 @@ class SitemapGeneratorSpec extends Specification {
   }
 
   "the sitemap generator" should {
+
+    "make sure that the protocol and domain are given/valid" in {
+      new SitemapGenerator("//folder")     must throwA[IllegalArgumentException]
+      new SitemapGenerator("http://")      must throwA[IllegalArgumentException]
+      new SitemapGenerator("www.ebay.com") must throwA[IllegalArgumentException]
+    }
 
     "generate xml containing an urlset element" in new context {
       generator.xml.label mustEqual "urlset"
@@ -39,11 +46,46 @@ class SitemapGeneratorSpec extends Specification {
       locElements(0).text mustEqual("http://www.example.com/blog")
     }
 
-    trait entryObjectContext extends context {
-      val entry = SitemapEntry(Uri.parse("http://www.example.com/blog"))
+    "will append the domain/baseUrl given just paths" in new context {
+      generator.add("/blog.html")
+      generator.add("//www.example.com/section/page") // a protocol-relative uri
+      (generator.xml \\ "loc").map(_.text) must contain(exactly(
+        "http://www.example.com/blog.html",
+        "http://www.example.com/section/page"))
     }
 
-    "uses an object for other sitemap entry info" in new entryObjectContext {
+    "will not accept pages from another domain" in new context {
+      generator.add("http://twitter.com/hoff2dev") must(
+        throwA[IllegalArgumentException])
+    }
+
+    "will not accept invalid urls" in new context {
+      generator.add("derp?!") must throwA[ParseError]
+      // this error comes from scala-uri when implicitly converting
+      // a string to a Uri whilst instantiating a SitemapEntry. I'm
+      // not sure how to catch it and convert it to another exception
+      // type, or even if that's what I should do.
+    }
+
+    "will check for invalid changefreq values" in new context {
+      pending
+    }
+
+    "will check for invalid priority values" in new context {
+      pending
+    }
+
+    "will accept lastmod as string and convert to DateTime" in new context {
+      pending
+    }
+
+    trait entryObjectContext extends context {
+      val entry = SitemapEntry("http://www.example.com/blog")
+      // here to make sure this doesn't error:
+      val entry2 = SitemapEntry("http://www.example.com/blog", None, None, None)
+    }
+
+    "uses a case object for sitemap entry info" in new entryObjectContext {
       generator.add(entry)
       (generator.xml \\ "loc")(0).text mustEqual "http://www.example.com/blog"
     }
@@ -67,13 +109,20 @@ class SitemapGeneratorSpec extends Specification {
       (generator.xml \\ "priority")(0).text mustEqual "0.8"
     }
 
-    // take other url info (lastmod, changefreq, priority)
-    // take paths as well as full urls or URL objects (scala-uri)
-    // error on invalid data (url, lastmod, changefreq, priority)
-    // take URL objects as well as strings
-    // check when list of urls gets too big (max 50k)
-    // sort urls in output
-    // catch or ignore duplicate urls
-    // date formatting options
+    "error when sitemap grows beyond 50,000 entries" in new context {
+      pending
+    }
+
+    "ignore duplicate urls" in new context {
+      pending
+    }
+
+    "sort entries by url in the xml output" in new context {
+      pending
+    }
+
+    "format lastmod" in new context {
+      pending
+    }
   }
 }
