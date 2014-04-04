@@ -60,23 +60,11 @@ class SitemapGeneratorSpec extends Specification {
     }
 
     "will not accept invalid urls" in new context {
-      generator.add("derp?!") must throwA[ParseError]
-      // this error comes from scala-uri when implicitly converting
+      generator.add("derp?!") must throwA[RuntimeException]
+      // ParseError comes from scala-uri when implicitly converting
       // a string to a Uri whilst instantiating a SitemapEntry. I'm
       // not sure how to catch it and convert it to another exception
       // type, or even if that's what I should do.
-    }
-
-    "will check for invalid changefreq values" in new context {
-      pending
-    }
-
-    "will check for invalid priority values" in new context {
-      pending
-    }
-
-    "will accept lastmod as string and convert to DateTime" in new context {
-      pending
     }
 
     trait entryObjectContext extends context {
@@ -98,15 +86,23 @@ class SitemapGeneratorSpec extends Specification {
     }
 
     "and changefreq" in new entryObjectContext {
-      generator.add(entry.copy(changefreq = Some("monthly")))
+      generator.add(entry.copy(changefreq = Some(Monthly)))
       (generator.xml \\ "changefreq") must not be empty
       (generator.xml \\ "changefreq")(0).text mustEqual "monthly"
     }
 
     "and priority" in new entryObjectContext {
-      generator.add(entry.copy(priority   = Some(0.8)))
+      generator.add(entry.copy(priority = Some(0.8)))
       (generator.xml \\ "priority") must not be empty
       (generator.xml \\ "priority")(0).text mustEqual "0.8"
+    }
+
+    "will check for invalid priority values" in new context {
+      pending
+    }
+
+    "will accept lastmod as string and convert to DateTime" in new context {
+      pending
     }
 
     "error when sitemap grows beyond 50,000 entries" in new context {
