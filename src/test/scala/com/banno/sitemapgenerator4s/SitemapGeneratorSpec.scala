@@ -13,15 +13,69 @@ class SitemapGeneratorSpec extends Specification {
     lazy val generator = new SitemapGenerator("http://www.example.com")
   }
 
-  "the sitemap generator" should {
+  "A sitemap generator" should {
 
-    "make sure that the protocol and domain are given/valid" in {
+    "make sure that the base url protocol and domain are given/valid" in {
       new SitemapGenerator("//folder")     must throwA[IllegalArgumentException]
       new SitemapGenerator("http://")      must throwA[IllegalArgumentException]
       new SitemapGenerator("www.ebay.com") must throwA[IllegalArgumentException]
     }
+  }
 
-    "generate xml containing an urlset element" in new context {
+  trait sitemapEntryContext extends Scope {
+    val entry = SitemapEntry("http://www.example.com/blog")
+    // here to make sure this doesn't error:
+    val entry2 = SitemapEntry("http://www.example.com/blog", None, None, None)
+  }
+
+  "A Sitemap Entry" should {
+
+    "not accept invalid urls" in  {
+      SitemapEntry("derp?!") must throwA[RuntimeException]
+      // ParseError comes from scala-uri when implicitly converting
+      // a string to a Uri whilst instantiating a SitemapEntry. I'm
+      // not sure how to catch it and convert it to another exception
+      // type, or even if that's what I should do.
+    }
+
+    "check for invalid priority values" in new sitemapEntryContext {
+      entry.copy(priority = Some(5.0))   must(throwA[IllegalArgumentException])
+      entry.copy(priority = Some(-0.05)) must(throwA[IllegalArgumentException])
+      entry.copy(priority = Some(1)) must not(throwA[IllegalArgumentException])
+      entry.copy(priority = Some(0)) must not(throwA[IllegalArgumentException])
+    }
+
+    "accept lastmod as string" in new sitemapEntryContext {
+      pending
+    }
+  }
+
+  trait addingEntriesContext extends context with sitemapEntryContext
+
+  "Adding entries to a sitemap" should {
+
+    "accept a SitemapEntry" in new addingEntriesContext {
+      generator.add(entry)
+      (generator.xml \\ "loc")(0).text mustEqual "http://www.example.com/blog"
+    }
+
+    "not accept pages from another domain" in new context {
+      generator.add("http://twitter.com/hoff2dev") must(
+        throwA[IllegalArgumentException])
+    }
+
+    "error when sitemap grows beyond 50,000 entries" in new context {
+      pending
+    }
+
+    "not accept duplicate urls" in new context {
+      pending
+    }
+  }
+
+  "The XML produced by a sitemap" should {
+
+    "be an urlset element" in new context {
       generator.xml.label mustEqual "urlset"
       generator.xml.namespace mustEqual(
         "http://www.sitemaps.org/schemas/sitemap/0.9")
@@ -31,7 +85,7 @@ class SitemapGeneratorSpec extends Specification {
       generator.xml \\ "url" must be empty
     }
 
-    "Have one url element for each url added" in new context {
+    "contain one url element for each url added" in new context {
       generator.add("http://www.example.com/")
       (generator.xml \ "url" length) mustEqual(1)
       generator.add("http://www.example.com/blog")
@@ -46,7 +100,7 @@ class SitemapGeneratorSpec extends Specification {
       locElements(0).text mustEqual("http://www.example.com/blog")
     }
 
-    "will append the domain/baseUrl given just paths" in new context {
+    "append the domain/baseUrl when given just paths" in new context {
       generator.add("/blog.html")
       generator.add("//www.example.com/section/page") // a protocol-relative uri
       (generator.xml \\ "loc").map(_.text) must contain(exactly(
@@ -54,79 +108,30 @@ class SitemapGeneratorSpec extends Specification {
         "http://www.example.com/section/page"))
     }
 
-    "will not accept pages from another domain" in new context {
-      generator.add("http://twitter.com/hoff2dev") must(
-        throwA[IllegalArgumentException])
-    }
-
-    "will not accept invalid urls" in  {
-      SitemapEntry("derp?!") must throwA[RuntimeException]
-      // ParseError comes from scala-uri when implicitly converting
-      // a string to a Uri whilst instantiating a SitemapEntry. I'm
-      // not sure how to catch it and convert it to another exception
-      // type, or even if that's what I should do.
-    }
-
-    trait entryObjectContext extends context {
-      val entry = SitemapEntry("http://www.example.com/blog")
-      // here to make sure this doesn't error:
-      val entry2 = SitemapEntry("http://www.example.com/blog", None, None, None)
-    }
-
-    "uses a case object for sitemap entry info" in new entryObjectContext {
-      generator.add(entry)
-      (generator.xml \\ "loc")(0).text mustEqual "http://www.example.com/blog"
-    }
-
-    "including lastmod" in new entryObjectContext {
+    "include each entry's lastmod" in new addingEntriesContext {
       val justNow = DateTime.now
       generator.add(entry.copy(lastmod = Some(justNow)))
       (generator.xml \\ "lastmod") must not be empty
       new DateTime((generator.xml \\ "lastmod")(0).text) mustEqual justNow
     }
 
-    "and changefreq" in new entryObjectContext {
+    "and changefreq" in new addingEntriesContext {
       generator.add(entry.copy(changefreq = Some(Monthly)))
       (generator.xml \\ "changefreq") must not be empty
       (generator.xml \\ "changefreq")(0).text mustEqual "monthly"
     }
 
-    "and priority" in new entryObjectContext {
+    "and priority" in new addingEntriesContext {
       generator.add(entry.copy(priority = Some(0.8)))
       (generator.xml \\ "priority") must not be empty
       (generator.xml \\ "priority")(0).text mustEqual "0.8"
     }
 
-    "will check for invalid priority values" in new entryObjectContext {
-      generator.add(entry.copy(priority = Some(5.0))) must(
-        throwA[IllegalArgumentException])
-      generator.add(entry.copy(priority = Some(-0.05))) must(
-        throwA[IllegalArgumentException])
-      generator.add(entry.copy(priority = Some(1))) must not(
-        throwA[IllegalArgumentException])
-      generator.add(entry.copy(priority = Some(0))) must not(
-        throwA[IllegalArgumentException])
-    }
-
-    "will accept lastmod as string and convert to DateTime" in
-      new entryObjectContext
-    {
+    "order entries according to loc" in new context {
       pending
     }
 
-    "error when sitemap grows beyond 50,000 entries" in new context {
-      pending
-    }
-
-    "ignore duplicate urls" in new context {
-      pending
-    }
-
-    "sort entries by url in the xml output" in new context {
-      pending
-    }
-
-    "format lastmod" in new context {
+    "format lastmod in W3C Datetime format" in new context {
       pending
     }
   }
