@@ -15,6 +15,7 @@ class Sitemap(val baseUrl: Uri) extends ISitemap
   require(baseUrl.scheme != None, "Base Url requires protocol")
   require(baseUrl.host   != None, "Base Url requires host")
 
+  val maxEntries = 50000
   var entries: Seq[SitemapEntry] = Seq()
   val xmlns = "http://www.sitemaps.org/schemas/sitemap/0.9"
 
@@ -24,8 +25,18 @@ class Sitemap(val baseUrl: Uri) extends ISitemap
     </urlset>
   }
 
+  private def ifOkToAdd(entry: SitemapEntry) = {
+    if (entries.length >= maxEntries) {
+      throw new RuntimeException(s"Maximum $maxEntries entries per sitemap")
+    }
+    if (entries.map(_.loc).contains(entry.loc)) {
+      throw new IllegalArgumentException("Duplicate loc added")
+    }
+    entry
+  }
+
   def add(entry: SitemapEntry): Unit = {
-    entries +:= validateEntry(entry)
+    entries +:= (validateEntry _ andThen ifOkToAdd _)(entry)
   }
 
   def add(url: Uri): Unit = add(SitemapEntry(url))

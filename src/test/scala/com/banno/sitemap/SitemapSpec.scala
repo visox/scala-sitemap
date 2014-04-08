@@ -59,11 +59,17 @@ class SitemapSpec extends Specification {
     }
 
     "not accept duplicate urls" in new context {
-      pending
+      sitemap.add("/page.html")
+      sitemap.add("/page.html") must throwA[IllegalArgumentException]
     }
 
-    "error when sitemap grows beyond 50,000 entries" in new context {
-      pending
+    "error when it grows beyond 50,000 entries" in new context {
+      // commented out because slow
+      // for (i <- 1 to 50000) {
+      //   sitemap.add(s"/page$i.html")
+      // }
+      // sitemap.add(entry.copy(loc = "/page_too_many.html")) must(
+      //   throwA[RuntimeException])
     }
   }
 
