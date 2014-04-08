@@ -1,4 +1,4 @@
-= scala-sitemap
+# scala-sitemap
 
 This makes XML for sitemaps. I wrote it because sitemapgen4j doesn't
 give you any good way to do anything with the sitemaps it generates
@@ -13,15 +13,15 @@ pages. Hopefully we can live with that for now.
 
 More info about sitemaps in general: http://www.sitemaps.org/protocol.html
 
-== Usage
+## Usage
 
-=== Start a new sitemap:
+### Start a new sitemap:
 
 ```scala
 val mySitemap = Sitemap("http://example.com")
 ```
 
-=== Adding pages:
+### Adding pages:
 
 The only required data is the page's URL. All these work:
 
@@ -47,10 +47,10 @@ like the XML tags' labels in a sitemap:
 mySitemap.add(SitemapEntry("/blog", Some(DateTime.now - 1.day), Some(Daily), Some(0.8)))
 ```
 
-== License
+## License
 
 I don't know. Internal to Banno right now.
 
-== Contributing
+## Contributing
 
 Go for it.
