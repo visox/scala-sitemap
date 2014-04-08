@@ -1,4 +1,4 @@
-package com.banno.sitemapgenerator4s
+package com.banno.sitemap
 
 import com.github.nscala_time.time.Imports._
 import com.netaporter.uri.Uri
@@ -13,8 +13,6 @@ case object Weekly  extends ChangeFreq { val name = "weekly"  }
 case object Monthly extends ChangeFreq { val name = "monthly" }
 case object Yearly  extends ChangeFreq { val name = "yearly"  }
 case object Never   extends ChangeFreq { val name = "never"   }
-
-
 
 case class SitemapEntry(
   val loc:        Uri,

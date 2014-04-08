@@ -1,15 +1,15 @@
-package com.banno.sitemapgenerator4s
+package com.banno.sitemap
 
 import com.netaporter.uri.Uri
 import com.netaporter.uri.dsl._
 import scala.xml._
 
-trait ISitemapGenerator {
+trait ISitemap {
   def xml: NodeSeq
   def add(entry: SitemapEntry): Unit
 }
 
-class SitemapGenerator(val baseUrl: Uri) extends ISitemapGenerator
+class Sitemap(val baseUrl: Uri) extends ISitemap
     with SitemapEntryUtil
 {
   require(baseUrl.scheme != None, "Base Url requires protocol")
