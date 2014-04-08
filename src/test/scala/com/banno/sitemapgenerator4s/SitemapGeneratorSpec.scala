@@ -24,8 +24,6 @@ class SitemapGeneratorSpec extends Specification {
 
   trait sitemapEntryContext extends Scope {
     val entry = SitemapEntry("http://www.example.com/blog")
-    // here to make sure this doesn't error:
-    val entry2 = SitemapEntry("http://www.example.com/blog", None, None, None)
   }
 
   "A Sitemap Entry" should {
@@ -44,10 +42,6 @@ class SitemapGeneratorSpec extends Specification {
       entry.copy(priority = Some(1)) must not(throwA[IllegalArgumentException])
       entry.copy(priority = Some(0)) must not(throwA[IllegalArgumentException])
     }
-
-    "accept lastmod as string" in new sitemapEntryContext {
-      pending
-    }
   }
 
   trait addingEntriesContext extends context with sitemapEntryContext
@@ -64,11 +58,11 @@ class SitemapGeneratorSpec extends Specification {
         throwA[IllegalArgumentException])
     }
 
-    "error when sitemap grows beyond 50,000 entries" in new context {
+    "not accept duplicate urls" in new context {
       pending
     }
 
-    "not accept duplicate urls" in new context {
+    "error when sitemap grows beyond 50,000 entries" in new context {
       pending
     }
   }

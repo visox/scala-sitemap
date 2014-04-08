@@ -14,6 +14,8 @@ case object Monthly extends ChangeFreq { val name = "monthly" }
 case object Yearly  extends ChangeFreq { val name = "yearly"  }
 case object Never   extends ChangeFreq { val name = "never"   }
 
+
+
 case class SitemapEntry(
   val loc:        Uri,
   val lastmod:    Option[DateTime] = None,
