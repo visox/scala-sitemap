@@ -21,8 +21,14 @@ class Sitemap(val baseUrl: Uri) extends ISitemap
 
   def xml = {
     <urlset xmlns={xmlns}>
-      { entries.map(entryXml(_)) }
+      { sortedEntries.map(entryXml(_)) }
     </urlset>
+  }
+
+  private def sortedEntries = {
+    entries.sortWith((e1: SitemapEntry, e2: SitemapEntry) =>
+      e1.loc.pathParts.length < e2.loc.pathParts.length &&
+      e1.loc.toString < e2.loc.toString)
   }
 
   private def ifOkToAdd(entry: SitemapEntry) = {

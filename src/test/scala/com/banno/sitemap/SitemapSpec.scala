@@ -128,11 +128,28 @@ class SitemapSpec extends Specification {
     }
 
     "order entries according to loc" in new context {
-      pending
+      // to try to keep pages in the same section together
+      sitemap.add("http://www.example.com/section/something.html")
+      sitemap.add("http://www.example.com/page44.html")
+      sitemap.add("http://www.example.com/section/page1.html")
+      (sitemap.xml \\ "loc").map(_.text) mustEqual(Seq(
+        "http://www.example.com/page44.html",
+        "http://www.example.com/section/page1.html",
+        "http://www.example.com/section/something.html"))
     }
 
     "format lastmod in W3C Datetime format" in new context {
-      pending
+      sitemap.add(SitemapEntry("/index.html",
+        Some(new DateTime(2014, 2, 13, 12, 0).withZoneRetainFields(
+          DateTimeZone.forID("-06:00")))))
+      (sitemap.xml \\ "lastmod")(0).text mustEqual(
+        "2014-02-13T12:00:00.000-06:00")
+      // possible TODO: support for leaving off optional parts of the
+      // datetime format. Currently Scala seems to be giving back the
+      // above format by default (probably since this is XML) without
+      // any effort on our part specifying a format, so this will do
+      // for now.
+      // for more info: http://www.w3.org/TR/NOTE-datetime
     }
   }
 }
