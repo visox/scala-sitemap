@@ -48,17 +48,14 @@ trait SitemapEntryUtil {
 
   protected def fillInMissingDomains(entry: SitemapEntry) = {
     (entry.loc.scheme, entry.loc.host) match {
-      case (None, None) => {
+      case (None, None) =>
         entry.copy(loc = entry.loc.copy(
           scheme = baseUrl.scheme,
           host   = baseUrl.host))
-      }
-      case (None, _) => {
+      case (None, _) =>
         entry.copy(loc = entry.loc.copy(scheme = baseUrl.scheme))
-      }
-      case (_, None) => {
+      case (_, None) =>
         entry.copy(loc = entry.loc.copy(host = baseUrl.host))
-      }
       case (_, _) => entry
     }
   }
