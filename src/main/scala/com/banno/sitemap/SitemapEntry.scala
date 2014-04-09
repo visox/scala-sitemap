@@ -20,7 +20,10 @@ case class SitemapEntry(
   val changefreq: Option[ChangeFreq] = None,
   val priority:   Option[Double]   = None){
 
-  require(!priority.isDefined || (priority.exists(p =>  p <= 1.0 && p >= 0.0)))
+  require(priority match {
+    case None    => true
+    case Some(p) => p <= 1.0 && p >= 0.0
+  })
 
   def apply(loc: Uri): SitemapEntry = SitemapEntry(loc, None, None, None)
 }
