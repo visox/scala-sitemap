@@ -23,7 +23,7 @@ case class SitemapEntry(
   require(priority match {
     case None    => true
     case Some(p) => p <= 1.0 && p >= 0.0
-  })
+  }, "Priority must be between 0.0 and 1.0 inclusive")
 
   def apply(loc: Uri): SitemapEntry = SitemapEntry(loc, None, None, None)
 }
