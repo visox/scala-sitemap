@@ -53,4 +53,4 @@ I don't know. Internal to Banno right now.
 
 ## Contributing
 
-Go for it.
+Go for it. (with tests.)
