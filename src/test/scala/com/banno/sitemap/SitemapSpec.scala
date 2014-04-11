@@ -66,9 +66,7 @@ class SitemapSpec extends Specification {
     }
 
     "error when it grows beyond 50,000 entries" in new context {
-      // commented out because slow
-      // for (i <- 1 to 50000) {
-      //   sitemap.add(s"/page$i.html")
+//      val entries = (1 to 50000).map(SitemapEntry(s"/page$i.html"))
       // }
       // sitemap.add(entry.copy(loc = "/page_too_many.html")) must(
       //   throwA[RuntimeException])
@@ -148,10 +146,8 @@ class SitemapSpec extends Specification {
     "format lastmod in W3C Datetime format" in new context {
       val lastmod = new DateTime(2014, 2, 13, 12, 0)
         .withZoneRetainFields(DateTimeZone.forID("-06:00"))
-      (Sitemap(baseUrl, Seq(
-        SitemapEntry(
-          "/index.html",
-          Some(lastmod))))
+      val entry = SitemapEntry("/index.html", Some(lastmod))
+      (Sitemap(baseUrl, Seq(entry))
         .xml \\ "lastmod")(0).text mustEqual("2014-02-13T12:00:00.000-06:00")
       // possible TODO: support for leaving off optional parts of the
       // datetime format. Currently Scala seems to be giving back the

@@ -15,18 +15,18 @@ object Sitemap {
   }
 }
 
-class Sitemap(val baseUrl: Uri, val entries: Seq[SitemapEntry] = Seq())
+class Sitemap(val baseUrl: Uri, initEntries: Seq[SitemapEntry] = Seq())
     extends ISitemap
     with SitemapEntryUtil
 {
   val maxEntries = 50000
-  require(entries.length <= maxEntries,
+  require(initEntries.length <= maxEntries,
     s"Maximum $maxEntries entries per sitemap")
   require(baseUrl.scheme != None,
     "Base Url requires protocol")
   require(baseUrl.host   != None,
     "Base Url requires host")
-
+  val entries = initEntries.map(validateEntry _)
   val xmlns = "http://www.sitemaps.org/schemas/sitemap/0.9"
 
   def xml = {
