@@ -10,7 +10,8 @@ import com.netaporter.uri.dsl._
 class SitemapSpec extends Specification {
 
   trait context extends Scope {
-    lazy val sitemap = new Sitemap("http://www.example.com")
+    val baseUrl = "http://www.example.com"
+    lazy val sitemap = new Sitemap(baseUrl)
   }
 
   "A sitemap" should {
@@ -49,8 +50,8 @@ class SitemapSpec extends Specification {
   "Adding entries to a sitemap" should {
 
     "accept a SitemapEntry" in new addingEntriesContext {
-      sitemap.add(entry)
-      (sitemap.xml \\ "loc")(0).text mustEqual "http://www.example.com/blog"
+      (Sitemap(baseUrl, Seq(entry)).xml \\ "loc")(0).text mustEqual(
+        "http://www.example.com/blog")
     }
 
     "not accept pages from another domain" in new context {
@@ -59,8 +60,9 @@ class SitemapSpec extends Specification {
     }
 
     "not accept duplicate urls" in new context {
-      sitemap.add("/page.html")
-      sitemap.add("/page.html") must throwA[IllegalArgumentException]
+      sitemap
+        .add("/page.html")
+        .add("/page.html") must(throwA[IllegalArgumentException])
     }
 
     "error when it grows beyond 50,000 entries" in new context {
@@ -86,64 +88,71 @@ class SitemapSpec extends Specification {
     }
 
     "contain one url element for each url added" in new context {
-      sitemap.add("http://www.example.com/")
-      (sitemap.xml \ "url" length) mustEqual(1)
-      sitemap.add("http://www.example.com/blog")
-      (sitemap.xml \ "url" length) mustEqual(2)
+      (sitemap
+        .add("http://www.example.com/")
+        .xml \ "url" length) mustEqual(1)
+      (sitemap
+        .add("http://www.example.com/blog")
+        .add("http://www.example.com/")
+        .xml \ "url" length) mustEqual(2)
     }
 
     "place each url in a loc element within its url element" in new context {
-      sitemap.add("http://www.example.com/blog")
-      val urlElement = (sitemap.xml \ "url")(0)
+      val newSitemap = sitemap.add("http://www.example.com/blog")
+      val urlElement = (newSitemap.xml \ "url")(0)
       val locElements = (urlElement \ "loc")
       locElements.length mustEqual(1)
       locElements(0).text mustEqual("http://www.example.com/blog")
     }
 
     "append the domain/baseUrl when given just paths" in new context {
-      sitemap.add("/blog.html")
-      sitemap.add("//www.example.com/section/page") // a protocol-relative uri
-      (sitemap.xml \\ "loc").map(_.text) must contain(exactly(
-        "http://www.example.com/blog.html",
-        "http://www.example.com/section/page"))
+      (sitemap
+        .add("/blog.html")
+        .add("//www.example.com/section/page") // a protocol-relative uri
+        .xml \\ "loc").map(_.text) must contain(exactly(
+          "http://www.example.com/blog.html",
+          "http://www.example.com/section/page"))
     }
 
     "include each entry's lastmod" in new addingEntriesContext {
       val justNow = DateTime.now
-      sitemap.add(entry.copy(lastmod = Some(justNow)))
-      (sitemap.xml \\ "lastmod") must not be empty
-      new DateTime((sitemap.xml \\ "lastmod")(0).text) mustEqual justNow
+      new DateTime((sitemap
+        .add(entry.copy(lastmod = Some(justNow)))
+        .xml \\ "lastmod")(0).text) mustEqual justNow
     }
 
     "and changefreq" in new addingEntriesContext {
-      sitemap.add(entry.copy(changefreq = Some(Monthly)))
-      (sitemap.xml \\ "changefreq") must not be empty
-      (sitemap.xml \\ "changefreq")(0).text mustEqual "monthly"
+      (sitemap
+        .add(entry.copy(changefreq = Some(Monthly)))
+        .xml \\ "changefreq")(0).text mustEqual "monthly"
     }
 
     "and priority" in new addingEntriesContext {
-      sitemap.add(entry.copy(priority = Some(0.8)))
-      (sitemap.xml \\ "priority") must not be empty
-      (sitemap.xml \\ "priority")(0).text mustEqual "0.8"
+      (sitemap
+        .add(entry.copy(priority = Some(0.8)))
+        .xml \\ "priority")(0).text mustEqual "0.8"
     }
 
     "order entries according to loc" in new context {
       // to try to keep pages in the same section together
-      sitemap.add("http://www.example.com/section/something.html")
-      sitemap.add("http://www.example.com/page44.html")
-      sitemap.add("http://www.example.com/section/page1.html")
-      (sitemap.xml \\ "loc").map(_.text) mustEqual(Seq(
-        "http://www.example.com/page44.html",
-        "http://www.example.com/section/page1.html",
-        "http://www.example.com/section/something.html"))
+      (sitemap
+        .add("http://www.example.com/section/something.html")
+        .add("http://www.example.com/page44.html")
+        .add("http://www.example.com/section/page1.html")
+        .xml \\ "loc").map(_.text) mustEqual(Seq(
+          "http://www.example.com/page44.html",
+          "http://www.example.com/section/page1.html",
+          "http://www.example.com/section/something.html"))
     }
 
     "format lastmod in W3C Datetime format" in new context {
-      sitemap.add(SitemapEntry("/index.html",
-        Some(new DateTime(2014, 2, 13, 12, 0).withZoneRetainFields(
-          DateTimeZone.forID("-06:00")))))
-      (sitemap.xml \\ "lastmod")(0).text mustEqual(
-        "2014-02-13T12:00:00.000-06:00")
+      val lastmod = new DateTime(2014, 2, 13, 12, 0)
+        .withZoneRetainFields(DateTimeZone.forID("-06:00"))
+      (Sitemap(baseUrl, Seq(
+        SitemapEntry(
+          "/index.html",
+          Some(lastmod))))
+        .xml \\ "lastmod")(0).text mustEqual("2014-02-13T12:00:00.000-06:00")
       // possible TODO: support for leaving off optional parts of the
       // datetime format. Currently Scala seems to be giving back the
       // above format by default (probably since this is XML) without

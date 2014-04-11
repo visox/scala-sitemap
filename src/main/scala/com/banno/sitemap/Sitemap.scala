@@ -6,17 +6,27 @@ import scala.xml._
 
 trait ISitemap {
   def xml: NodeSeq
-  def add(entry: SitemapEntry): Unit
+  def add(entry: SitemapEntry): Sitemap
 }
 
-class Sitemap(val baseUrl: Uri) extends ISitemap
+object Sitemap {
+  def apply(baseUrl: Uri, entries: Seq[SitemapEntry] = Seq()) = {
+    new Sitemap(baseUrl, entries)
+  }
+}
+
+class Sitemap(val baseUrl: Uri, val entries: Seq[SitemapEntry] = Seq())
+    extends ISitemap
     with SitemapEntryUtil
 {
-  require(baseUrl.scheme != None, "Base Url requires protocol")
-  require(baseUrl.host   != None, "Base Url requires host")
-
   val maxEntries = 50000
-  var entries: Seq[SitemapEntry] = Seq()
+  require(entries.length <= maxEntries,
+    s"Maximum $maxEntries entries per sitemap")
+  require(baseUrl.scheme != None,
+    "Base Url requires protocol")
+  require(baseUrl.host   != None,
+    "Base Url requires host")
+
   val xmlns = "http://www.sitemaps.org/schemas/sitemap/0.9"
 
   def xml = {
@@ -31,19 +41,13 @@ class Sitemap(val baseUrl: Uri) extends ISitemap
       e1.loc.toString < e2.loc.toString)
   }
 
-  private def ifOkToAdd(entry: SitemapEntry) = {
-    if (entries.length >= maxEntries) {
-      throw new RuntimeException(s"Maximum $maxEntries entries per sitemap")
-    }
-    if (entries.map(_.loc).contains(entry.loc)) {
+  def add(entry: SitemapEntry): Sitemap = {
+    val newEntry = validateEntry(entry)
+    if (entries.map(_.loc).contains(newEntry.loc))
       throw new IllegalArgumentException("Duplicate loc added")
-    }
-    entry
+    else
+      Sitemap(baseUrl, newEntry +: entries)
   }
 
-  def add(entry: SitemapEntry): Unit = {
-    entries +:= (validateEntry _ andThen ifOkToAdd _)(entry)
-  }
-
-  def add(url: Uri): Unit = add(SitemapEntry(url))
+  def add(url: Uri): Sitemap = add(SitemapEntry(url))
 }

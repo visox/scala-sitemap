@@ -18,8 +18,8 @@ case class SitemapEntry(
   val loc:        Uri,
   val lastmod:    Option[DateTime] = None,
   val changefreq: Option[ChangeFreq] = None,
-  val priority:   Option[Double]   = None){
-
+  val priority:   Option[Double]   = None)
+{
   require(priority match {
     case None    => true
     case Some(p) => p <= 1.0 && p >= 0.0
