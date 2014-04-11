@@ -1,5 +1,6 @@
 package com.banno.sitemap
 
+import com.github.nscala_time.time.Imports._
 import com.netaporter.uri.Uri
 import com.netaporter.uri.dsl._
 import scala.xml._
@@ -49,5 +50,12 @@ class Sitemap(val baseUrl: Uri, initEntries: Seq[SitemapEntry] = Seq())
       Sitemap(baseUrl, newEntry +: entries)
   }
 
-  def add(url: Uri): Sitemap = add(SitemapEntry(url))
+  def add(
+    loc:        Uri,
+    lastmod:    Option[DateTime] = None,
+    changefreq: Option[ChangeFreq] = None,
+    priority:   Option[Double]   = None): Sitemap =
+  {
+    add(SitemapEntry(loc, lastmod, changefreq, priority))
+  }
 }
