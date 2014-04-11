@@ -13,6 +13,10 @@ class SitemapSpec extends Specification {
     val baseUrl = "http://www.example.com"
     lazy val sitemap = new Sitemap(baseUrl)
   }
+  trait sitemapEntryContext extends Scope {
+    val entry = SitemapEntry("http://www.example.com/blog")
+  }
+  trait addingEntriesContext extends context with sitemapEntryContext
 
   "A sitemap" should {
 
@@ -21,10 +25,6 @@ class SitemapSpec extends Specification {
       new Sitemap("http://")      must throwA[IllegalArgumentException]
       new Sitemap("www.ebay.com") must throwA[IllegalArgumentException]
     }
-  }
-
-  trait sitemapEntryContext extends Scope {
-    val entry = SitemapEntry("http://www.example.com/blog")
   }
 
   "A Sitemap Entry" should {
@@ -45,8 +45,6 @@ class SitemapSpec extends Specification {
     }
   }
 
-  trait addingEntriesContext extends context with sitemapEntryContext
-
   "Adding entries to a sitemap" should {
 
     "accept a SitemapEntry" in new addingEntriesContext {
@@ -65,11 +63,11 @@ class SitemapSpec extends Specification {
         .add("/page.html") must(throwA[IllegalArgumentException])
     }
 
-    "error when it grows beyond 50,000 entries" in new context {
-//      val entries = (1 to 50000).map(SitemapEntry(s"/page$i.html"))
-      // }
-      // sitemap.add(entry.copy(loc = "/page_too_many.html")) must(
-      //   throwA[RuntimeException])
+    "error when it grows beyond 50,000 entries" in new addingEntriesContext {
+      val entries = (1 to 50000).map(i => SitemapEntry(s"/page$i.html"))
+      Sitemap(baseUrl, entries)
+        .add(entry.copy(loc = "/page_too_many.html")) must(
+        throwA[IllegalArgumentException])
     }
   }
 
