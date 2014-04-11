@@ -57,9 +57,13 @@ And then of course, just ask it for its XML.
 sitemap.xml
 ```
 
+## Install
+
+Hosted in Banno's Bintray:  "com.banno" %% "scala-sitemap" % "0.9"
+
 ## License
 
-I don't know. Internal to Banno right now.
+Apache 2.0
 
 ## Contributing
 

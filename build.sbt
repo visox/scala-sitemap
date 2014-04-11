@@ -1,3 +1,5 @@
+import bintray.Keys._
+
 organization := "com.banno"
 
 name := "scala-sitemap"
@@ -15,3 +17,11 @@ libraryDependencies ++= Seq(
 scalacOptions in Test ++= Seq("-Yrangepos")
 
 resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo)
+
+seq(bintrayPublishSettings:_*)
+
+bintrayOrganization in bintray := Some("banno")
+
+repository in bintray := "oss"
+
+licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.html"))
