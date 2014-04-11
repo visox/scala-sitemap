@@ -23,17 +23,18 @@ val mySitemap = Sitemap("http://example.com")
 
 ### Adding pages:
 
-The only required data is the page's URL. All these work:
-
+Adding pages to a sitemap produces a new sitemap. The only required
+data is the page's URL. All these work:
 ```scala
 mySitemap.add("/section/page")
 mySitemap.add("/section/page/")
-mySitemap.add("http://example.com/section/page")
-mySitemap.add("//example.com/section/page")
+mySitemap.add("http://example.com/section/page", Some(modified))
+mySitemap.add("//example.com/section/page", None, Some(Monthly))
 ```
 
-Even better use the SitemapEntry case class. Its attributes are named
-like the XML tags' labels in a sitemap:
+But `add` is just a convenient shortcut to the SitemapEntry case
+class, whose attributes are named like the XML tags' labels in a
+sitemap:
 
  - `loc` for the URL (`Uri` but scala-uri will implicitly
    convert from String)
@@ -43,8 +44,17 @@ like the XML tags' labels in a sitemap:
    `Weekly`, `Monthly`, `Yearly`, `Never`)
  - `priority` (`Option[Double]` between 0.0 and 1.0 inclusive)
 
+So in practice, you'll more likely make sitemap something like this:
 ```scala
-mySitemap.add(SitemapEntry("/blog", Some(DateTime.now - 1.day), Some(Daily), Some(0.8)))
+val sitemap = Sitemap(
+  "http://example.com",
+  allMyPages.map(page =>
+    SitemapEntry(page.path, Some(page.modified), Some(Weekly))))
+```
+
+And then of course, just ask it for its XML.
+```scala
+sitemap.xml
 ```
 
 ## License
