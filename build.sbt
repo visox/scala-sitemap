@@ -1,6 +1,8 @@
-name := "sitemapgenerator4s"
+organization := "com.banno"
 
-version := "0.1"
+name := "scala-sitemap"
+
+version := "0.9"
 
 scalaVersion := "2.10.3"
 
