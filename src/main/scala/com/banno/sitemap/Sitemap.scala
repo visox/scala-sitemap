@@ -11,8 +11,12 @@ trait ISitemap {
 }
 
 object Sitemap {
-  def apply(baseUrl: Uri, entries: Seq[SitemapEntry] = Seq()) = {
-    new Sitemap(baseUrl, entries)
+  def apply(baseUrl: String, initEntries: Seq[SitemapEntry] = Seq()): Sitemap = {
+    new Sitemap(baseUrl, initEntries)
+  }
+
+  def apply(baseUrl: Uri, initEntries: Seq[SitemapEntry] = Seq()): Sitemap = {
+    new Sitemap(baseUrl, initEntries)
   }
 }
 
@@ -27,12 +31,12 @@ class Sitemap(val baseUrl: Uri, initEntries: Seq[SitemapEntry] = Seq())
     "Base Url requires protocol")
   require(baseUrl.host   != None,
     "Base Url requires host")
-  val entries = initEntries.map(validateEntry _)
+  val entries = initEntries.map(validateEntry)
   val xmlns = "http://www.sitemaps.org/schemas/sitemap/0.9"
 
   def xml = {
     <urlset xmlns={xmlns}>
-      { sortedEntries.map(entryXml(_)) }
+      { sortedEntries.map(entryXml) }
     </urlset>
   }
 
@@ -47,11 +51,11 @@ class Sitemap(val baseUrl: Uri, initEntries: Seq[SitemapEntry] = Seq())
     if (entries.map(_.loc).contains(newEntry.loc))
       throw new IllegalArgumentException("Duplicate loc added")
     else
-      Sitemap(baseUrl, newEntry +: entries)
+      new Sitemap(baseUrl, newEntry +: entries)
   }
 
   def add(
-    loc:        Uri,
+    loc:        String,
     lastmod:    Option[DateTime] = None,
     changefreq: Option[ChangeFreq] = None,
     priority:   Option[Double]   = None): Sitemap =

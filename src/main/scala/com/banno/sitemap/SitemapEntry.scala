@@ -5,27 +5,28 @@ import com.netaporter.uri.Uri
 import com.netaporter.uri.dsl._
 import scala.xml._
 
-sealed trait ChangeFreq { val name: String; override def toString = name }
-case object Always  extends ChangeFreq { val name = "always"  }
-case object Hourly  extends ChangeFreq { val name = "hourly"  }
-case object Daily   extends ChangeFreq { val name = "daily"   }
-case object Weekly  extends ChangeFreq { val name = "weekly"  }
-case object Monthly extends ChangeFreq { val name = "monthly" }
-case object Yearly  extends ChangeFreq { val name = "yearly"  }
-case object Never   extends ChangeFreq { val name = "never"   }
+sealed abstract class ChangeFreq(name:String) {
+  override def toString = name
+}
+
+case object Always  extends ChangeFreq("always")
+case object Hourly  extends ChangeFreq("hourly")
+case object Daily   extends ChangeFreq("daily")
+case object Weekly  extends ChangeFreq("weekly")
+case object Monthly extends ChangeFreq("monthly")
+case object Yearly  extends ChangeFreq("yearly")
+case object Never   extends ChangeFreq("never")
 
 case class SitemapEntry(
-  val loc:        Uri,
-  val lastmod:    Option[DateTime] = None,
-  val changefreq: Option[ChangeFreq] = None,
-  val priority:   Option[Double]   = None)
+  loc:        Uri,
+  lastmod:    Option[DateTime] = None,
+  changefreq: Option[ChangeFreq] = None,
+  priority:   Option[Double]   = None)
 {
   require(priority match {
     case None    => true
     case Some(p) => p <= 1.0 && p >= 0.0
   }, "Priority must be between 0.0 and 1.0 inclusive")
-
-  def apply(loc: Uri): SitemapEntry = SitemapEntry(loc, None, None, None)
 }
 
 trait SitemapEntryUtil {
