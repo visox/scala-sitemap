@@ -154,5 +154,28 @@ class SitemapSpec extends Specification {
       // for now.
       // for more info: http://www.w3.org/TR/NOTE-datetime
     }
+
+    // acceptance test
+    "work as used typically" in new context {
+      val pages = Seq(
+        ("/section/something.html", new DateTime(2014, 2, 13, 12, 0)),
+        ("/page44.html",            new DateTime(2014, 2, 28, 14, 15)),
+        ("/section/page1.html",     new DateTime(2014, 4, 23, 10, 0)))
+      val xml = Sitemap("http://www.example.com",
+        pages.map( page =>
+          SitemapEntry(page._1, Some(page._2), Some(Weekly), Some(0.7)))).xml
+      (xml \\ "lastmod").map(_.text) mustEqual Seq(
+        "2014-02-28T14:15:00.000-06:00",
+        "2014-02-13T12:00:00.000-06:00",
+        "2014-04-23T10:00:00.000-05:00")
+      (xml \\ "loc").map(_.text) mustEqual Seq(
+        "http://www.example.com/page44.html",
+        "http://www.example.com/section/something.html",
+        "http://www.example.com/section/page1.html")
+      (xml \\ "changefreq").map(_.text) mustEqual(
+        Seq("weekly", "weekly", "weekly"))
+      (xml \\ "priority")map(_.text) mustEqual(
+        Seq("0.7", "0.7", "0.7"))
+    }
   }
 }
