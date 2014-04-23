@@ -57,7 +57,7 @@ class Sitemap(val baseUrl: Uri, initEntries: Seq[SitemapEntry] = Seq())
   def add(
     loc:        String,
     lastmod:    Option[DateTime] = None,
-    changefreq: Option[ChangeFreq] = None,
+    changefreq: Option[ChangeFreq.Value] = None,
     priority:   Option[Double]   = None): Sitemap =
   {
     add(SitemapEntry(loc, lastmod, changefreq, priority))

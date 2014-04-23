@@ -5,23 +5,22 @@ import com.netaporter.uri.Uri
 import com.netaporter.uri.dsl._
 import scala.xml._
 
-sealed abstract class ChangeFreq(name:String) {
-  override def toString = name
+object ChangeFreq extends Enumeration {
+  val Always  = Value("always")
+  val Hourly  = Value("hourly")
+  val Daily   = Value("daily")
+  val Weekly  = Value("weekly")
+  val Monthly = Value("monthly")
+  val Yearly  = Value("yearly")
+  val Never   = Value("never")
 }
 
-case object Always  extends ChangeFreq("always")
-case object Hourly  extends ChangeFreq("hourly")
-case object Daily   extends ChangeFreq("daily")
-case object Weekly  extends ChangeFreq("weekly")
-case object Monthly extends ChangeFreq("monthly")
-case object Yearly  extends ChangeFreq("yearly")
-case object Never   extends ChangeFreq("never")
-
 object SitemapEntry {
+  import ChangeFreq._
   def apply(
     loc:        String,
     lastmod:    Option[DateTime]   = None,
-    changefreq: Option[ChangeFreq] = None,
+    changefreq: Option[ChangeFreq.Value] = None,
     priority:   Option[Double]     = None): SitemapEntry =
   {
     SitemapEntry(Uri.parse(loc), lastmod, changefreq, priority)
@@ -31,7 +30,7 @@ object SitemapEntry {
 case class SitemapEntry(
   loc:        Uri,
   lastmod:    Option[DateTime],
-  changefreq: Option[ChangeFreq],
+  changefreq: Option[ChangeFreq.Value],
   priority:   Option[Double])
 {
   require(priority match {
