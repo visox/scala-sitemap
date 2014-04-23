@@ -17,11 +17,22 @@ case object Monthly extends ChangeFreq("monthly")
 case object Yearly  extends ChangeFreq("yearly")
 case object Never   extends ChangeFreq("never")
 
+object SitemapEntry {
+  def apply(
+    loc:        String,
+    lastmod:    Option[DateTime]   = None,
+    changefreq: Option[ChangeFreq] = None,
+    priority:   Option[Double]     = None): SitemapEntry =
+  {
+    SitemapEntry(Uri.parse(loc), lastmod, changefreq, priority)
+  }
+}
+
 case class SitemapEntry(
   loc:        Uri,
-  lastmod:    Option[DateTime] = None,
-  changefreq: Option[ChangeFreq] = None,
-  priority:   Option[Double]   = None)
+  lastmod:    Option[DateTime],
+  changefreq: Option[ChangeFreq],
+  priority:   Option[Double])
 {
   require(priority match {
     case None    => true
@@ -29,9 +40,7 @@ case class SitemapEntry(
   }, "Priority must be between 0.0 and 1.0 inclusive")
 }
 
-trait SitemapEntryUtil {
-  val baseUrl: Uri
-
+trait SitemapEntryXml {
   def entryXml(entry: SitemapEntry) =
     <url>
       <loc>{entry.loc}</loc>
@@ -46,6 +55,10 @@ trait SitemapEntryUtil {
       case None => NodeSeq.Empty
     }
   }
+}
+
+trait SitemapEntryUtil {
+  val baseUrl: Uri
 
   protected def fillInMissingDomains(entry: SitemapEntry) = {
     (entry.loc.scheme, entry.loc.host) match {

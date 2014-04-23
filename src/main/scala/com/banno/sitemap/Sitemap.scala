@@ -11,11 +11,9 @@ trait ISitemap {
 }
 
 object Sitemap {
-  def apply(baseUrl: String, initEntries: Seq[SitemapEntry] = Seq()): Sitemap = {
-    new Sitemap(baseUrl, initEntries)
-  }
-
-  def apply(baseUrl: Uri, initEntries: Seq[SitemapEntry] = Seq()): Sitemap = {
+  def apply(
+    baseUrl: String, initEntries: Seq[SitemapEntry] = Seq()): Sitemap =
+  {
     new Sitemap(baseUrl, initEntries)
   }
 }
@@ -23,6 +21,7 @@ object Sitemap {
 class Sitemap(val baseUrl: Uri, initEntries: Seq[SitemapEntry] = Seq())
     extends ISitemap
     with SitemapEntryUtil
+    with SitemapEntryXml
 {
   val maxEntries = 50000
   require(initEntries.length <= maxEntries,
@@ -31,6 +30,7 @@ class Sitemap(val baseUrl: Uri, initEntries: Seq[SitemapEntry] = Seq())
     "Base Url requires protocol")
   require(baseUrl.host   != None,
     "Base Url requires host")
+
   val entries = initEntries.map(validateEntry)
   val xmlns = "http://www.sitemaps.org/schemas/sitemap/0.9"
 
