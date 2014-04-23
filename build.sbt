@@ -4,7 +4,7 @@ organization := "com.banno"
 
 name := "scala-sitemap"
 
-version := "0.10"
+version := "0.10.1"
 
 scalaVersion := "2.10.3"
 

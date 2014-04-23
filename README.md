@@ -29,7 +29,7 @@ data is the page's URL. All these work:
 mySitemap.add("/section/page")
 mySitemap.add("/section/page/")
 mySitemap.add("http://example.com/section/page", Some(modified))
-mySitemap.add("//example.com/section/page", None, Some(Monthly))
+mySitemap.add("//example.com/section/page", None, Some(ChangeFreq.Monthly))
 ```
 
 But `add` is just a convenient shortcut to the SitemapEntry case
@@ -39,17 +39,17 @@ sitemap:
  - `loc` for the URL (`Uri` but scala-uri will implicitly
    convert from String)
  - `lastmod` for last-modified (`Option[DateTime]`)
- - `changefreq` for change frequency (There is a set of case objects
-   for the valid values of this field: `Always`, `Hourly`, `Daily`,
-   `Weekly`, `Monthly`, `Yearly`, `Never`)
+ - `changefreq` for change frequency (using an enumeration called
+   `ChangeFreq`) for the valid values of this field: `Always`,
+   `Hourly`, `Daily`, `Weekly`, `Monthly`, `Yearly`, `Never`)
  - `priority` (`Option[Double]` between 0.0 and 1.0 inclusive)
 
-So in practice, you'll more likely make sitemap something like this:
+So in practice, you'll likely make sitemap something like this:
 ```scala
 val sitemap = Sitemap(
   "http://example.com",
   allMyPages.map(page =>
-    SitemapEntry(page.path, Some(page.modified), Some(Weekly))))
+    SitemapEntry(page.path, Some(page.modified), Some(ChangeFreq.Weekly))))
 ```
 
 And then of course, just ask it for its XML.
@@ -59,7 +59,7 @@ sitemap.xml
 
 ## Install
 
-Hosted in Banno's Bintray:  "com.banno" %% "scala-sitemap" % "0.9"
+Hosted in Banno's Bintray:  "com.banno" %% "scala-sitemap" % "0.10.1"
 
 ## License
 
