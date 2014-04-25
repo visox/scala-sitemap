@@ -102,12 +102,14 @@ class SitemapSpec extends Specification {
     }
 
     "append the domain/baseUrl when given just paths" in new context {
-      (sitemap
+      val locs = (sitemap
         .add("/blog.html")
         .add("//www.example.com/section/page") // a protocol-relative uri
-        .xml \\ "loc").map(_.text) must contain(exactly(
+        .xml \\ "loc")
+      locs.length mustEqual 2
+      locs.map(_.text) must containAllOf(
           "http://www.example.com/blog.html",
-          "http://www.example.com/section/page"))
+          "http://www.example.com/section/page")
     }
 
     "include each entry's lastmod" in new addingEntriesContext {
