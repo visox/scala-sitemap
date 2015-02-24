@@ -31,7 +31,7 @@ scalacOptions in Test ++= Seq("-Yrangepos")
 
 resolvers ++= Seq("snapshots", "releases").map(Resolver.sonatypeRepo)
 
-seq(bintrayPublishSettings:_*)
+bintrayPublishSettings
 
 bintrayOrganization in bintray := Some("banno")
 
