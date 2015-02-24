@@ -59,7 +59,10 @@ sitemap.xml
 
 ## Install
 
-Hosted in Banno's Bintray:  "com.banno" %% "scala-sitemap" % "0.10.1"
+Hosted in Banno's Bintray:  
+`"com.banno" %% "scala-sitemap" % "0.10.1"` Scala 2.10
+
+`"com.banno" %% "scala-sitemap" % "0.10.2"` Scala 2.11
 
 ## License
 

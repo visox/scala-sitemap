@@ -1,9 +1,8 @@
 package com.banno.sitemap
 
-import com.github.nscala_time.time.Imports._
+import com.github.nscala_time.time.Imports.DateTime
 import com.netaporter.uri.Uri
-import com.netaporter.uri.dsl._
-import scala.xml._
+import scala.xml.NodeSeq
 
 object ChangeFreq extends Enumeration {
   val Always  = Value("always")

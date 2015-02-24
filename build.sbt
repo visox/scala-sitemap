@@ -4,14 +4,16 @@ organization := "com.banno"
 
 name := "scala-sitemap"
 
-version := "0.10.1"
+version := "0.10.2"
 
-scalaVersion := "2.10.3"
+scalaVersion := "2.11.4"
 
 libraryDependencies ++= Seq(
-  "org.specs2" %% "specs2" % "2.3.10" % "test",
-  "com.github.nscala-time" %% "nscala-time" % "0.8.0",
-  "com.netaporter" %% "scala-uri" % "0.4.1"
+  "org.specs2" %% "specs2-core" % "2.4.15" % "test",
+  "com.github.nscala-time" %% "nscala-time" % "1.8.0",
+  "com.netaporter" %% "scala-uri" % "0.4.4",
+  "org.scala-lang.modules" %% "scala-xml" % "1.0.3",
+  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.3"
 )
 
 scalacOptions in Test ++= Seq("-Yrangepos")
