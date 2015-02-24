@@ -13,6 +13,11 @@ pages. Hopefully we can live with that for now.
 
 More info about sitemaps in general: http://www.sitemaps.org/protocol.html
 
+## Install
+
+Hosted in Banno's Bintray (for 2.10 and 2.11):
+`"com.banno" %% "scala-sitemap" % "0.10.3"`
+
 ## Usage
 
 ### Start a new sitemap:
@@ -56,13 +61,6 @@ And then of course, just ask it for its XML.
 ```scala
 sitemap.xml
 ```
-
-## Install
-
-Hosted in Banno's Bintray:  
-`"com.banno" %% "scala-sitemap" % "0.10.1"` Scala 2.10
-
-`"com.banno" %% "scala-sitemap" % "0.10.2"` Scala 2.11
 
 ## License
 
