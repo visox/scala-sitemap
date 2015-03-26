@@ -14,9 +14,11 @@ class SitemapSpec extends Specification {
     val baseUrl = "http://www.example.com"
     lazy val sitemap = new Sitemap(baseUrl)
   }
+
   trait sitemapEntryContext extends Scope {
     val entry = SitemapEntry("http://www.example.com/blog")
   }
+
   trait addingEntriesContext extends context with sitemapEntryContext
 
   "A sitemap" should {
@@ -41,6 +43,11 @@ class SitemapSpec extends Specification {
       // a string to a Uri whilst instantiating a SitemapEntry. I'm
       // not sure how to catch it and convert it to another exception
       // type, or even if that's what I should do.
+    }
+
+    "check that it accepts the correct urls" in new context {
+      sitemap.add("http://www.example.com/index.html?a=a&b=b")
+      success
     }
 
     "check for invalid priority values" in new sitemapEntryContext {
@@ -169,23 +176,26 @@ class SitemapSpec extends Specification {
         ("/section/something.html", new DateTime(2014, 2, 13, 12, 0)),
         ("/page44.html",            new DateTime(2014, 2, 28, 14, 15)),
         ("/section/page1.html",     new DateTime(2014, 4, 23, 10, 0)))
+
       val xml = Sitemap("http://www.example.com",
         pages.map( page =>
           SitemapEntry(
             page._1, Some(page._2),
             Some(ChangeFreq.Weekly), Some(0.7)))).xml
+
       (xml \\ "lastmod").map(_.text) mustEqual Seq(
         new DateTime(2014, 2, 28, 14, 15).toString,
-        new DateTime(2014, 2, 13, 12, 0).toString,
-        new DateTime(2014, 4, 23, 10, 0).toString)
+        new DateTime(2014, 4, 23, 10, 0).toString,
+        new DateTime(2014, 2, 13, 12, 0).toString)
+
       (xml \\ "loc").map(_.text) mustEqual Seq(
         "http://www.example.com/page44.html",
-        "http://www.example.com/section/something.html",
-        "http://www.example.com/section/page1.html")
-      (xml \\ "changefreq").map(_.text) mustEqual(
-        Seq("weekly", "weekly", "weekly"))
-      (xml \\ "priority")map(_.text) mustEqual(
-        Seq("0.7", "0.7", "0.7"))
+        "http://www.example.com/section/page1.html",
+        "http://www.example.com/section/something.html")
+
+      (xml \\ "changefreq").map(_.text) === Seq("weekly", "weekly", "weekly")
+
+      (xml \\ "priority").map(_.text) === Seq("0.7", "0.7", "0.7")
     }
   }
 }

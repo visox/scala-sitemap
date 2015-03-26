@@ -40,11 +40,8 @@ class Sitemap(val baseUrl: Uri, initEntries: Seq[SitemapEntry] = Seq())
     </urlset>
   }
 
-  private def sortedEntries = {
-    entries.sortWith((e1: SitemapEntry, e2: SitemapEntry) =>
-      e1.loc.pathParts.length < e2.loc.pathParts.length &&
-      e1.loc.toString < e2.loc.toString)
-  }
+  private def sortedEntries =
+    entries.sortBy(e => (e.loc.pathParts.length, e.loc.toString))
 
   def add(entry: SitemapEntry): Sitemap = {
     val newEntry = validateEntry(entry)
