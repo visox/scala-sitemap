@@ -4,24 +4,24 @@ organization := "com.banno"
 
 name := "scala-sitemap"
 
-version := "0.10.5"
+version := "0.10.6"
 
-scalaVersion := "2.11.5"
+scalaVersion := "2.12.6"
 
 crossScalaVersions := Seq("2.10.4", scalaVersion.value)
 
 val dependencies = Seq(
-  "org.specs2" %% "specs2-core" % "2.4.15" % "test",
-  "com.github.nscala-time" %% "nscala-time" % "1.8.0",
-  "com.netaporter" %% "scala-uri" % "0.4.4"
+  "org.specs2" %% "specs2-core" % "4.3.3" % "test",
+  "com.github.nscala-time" %% "nscala-time" % "2.20.0",
+  "com.netaporter" %% "scala-uri" % "0.4.16"
 )
 
 libraryDependencies := {
   CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, scalaMajor)) if scalaMajor >= 11 =>
       libraryDependencies.value ++ dependencies ++ Seq(
-        "org.scala-lang.modules" %% "scala-xml" % "1.0.3",
-        "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.3"
+        "org.scala-lang.modules" %% "scala-xml" % "1.1.0",
+        "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.1"
       )
     case _ => libraryDependencies.value ++ dependencies
   }
